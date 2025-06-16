@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asisten Analisis Tugas Pokok Jafung</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- PDF.js & Mammoth.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .fade-in { animation: fadeIn 0.5s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    select { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+    .file-input-label { cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem 1rem; background-color: #f9fafb; border: 2px dashed #d1d5db; border-radius: 0.5rem; transition: all 0.2s; }
+    .file-input-label:hover, .file-input-label.dragover { background-color: #eff6ff; border-color: #3b82f6; }
+    .file-input-label.has-file { border-style: solid; border-color: #16a34a; background-color: #f0fdf4; }
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    .idea-card:has(input:checked) { background-color: #eff6ff; border-color: #3b82f6; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+  <div class="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
+    <header class="text-center mb-10">
+      <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Asisten Analisis Tugas Pokok Jafung</h1>
+      <p class="mt-3 text-lg text-slate-600">Identifikasi jabatan, unggah tugas, definisikan isu, dan temukan "benang merah" untuk inovasi.</p>
+    </header>
+
+    <section id="main-interface" class="mb-12 bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-200">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6 text-center">Langkah 1: Analisis Tugas & Isu</h2>
+        <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                    <label for="select-rumpun" class="block text-sm font-bold text-slate-700 mb-2"><span class="bg-blue-600 text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">1</span>Pilih Rumpun Jabatan (Resmi)</label>
+                    <select id="select-rumpun" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"></select>
+                </div>
+                <div id="step-jafung" style="display:none;">
+                    <label for="select-jafung" class="block text-sm font-bold text-slate-700 mb-2"><span class="bg-blue-600 text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>Pilih Jabatan Fungsional</label>
+                    <select id="select-jafung" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"></select>
+                </div>
+                 <div id="step-kategori" class="flex flex-col" style="display:none;">
+                    <label for="select-kategori" class="block text-sm font-bold text-slate-700 mb-2"><span class="bg-blue-600 text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">3</span>Pilih Kategori Jabatan</label>
+                    <select id="select-kategori" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"></select>
+                </div>
+                <div id="step-jenjang" class="flex flex-col" style="display:none;">
+                     <label for="select-jenjang" class="block text-sm font-bold text-slate-700 mb-2"><span class="bg-blue-600 text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">4</span>Pilih Jenjang Spesifik</label>
+                    <select id="select-jenjang" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"></select>
+                </div>
+            </div>
+
+            <div id="step-context" class="pt-4 border-t" style="display:none;">
+                <div class="space-y-6">
+                     <div>
+                         <label for="api-key" class="block text-sm font-bold text-slate-700 mb-2"><span class="bg-blue-600 text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">5</span>Masukkan Kunci API Google AI</label>
+                        <input type="password" id="api-key" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Analisis lebih cerdas dengan Gemini API Key">
+                        <details class="mt-2 text-xs text-slate-600"><summary class="cursor-pointer font-semibold text-blue-600 hover:underline">Belum punya Kunci API? Klik di sini untuk panduan.</summary><div class="mt-2 p-3 bg-slate-50 rounded-lg border"><ol class="list-decimal list-inside space-y-1"><li>Buka <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-600 font-bold">Google AI Studio</a>.</li><li>Login dengan akun Google Anda.</li><li>Klik tombol "Create API key in new project".</li><li>Salin (copy) kunci yang muncul dan tempel (paste) di kolom di atas.</li></ol></div></details>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2"><span class="bg-blue-600 text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">6</span>Unggah Tugas/Regulasi (PDF, DOCX, TXT)</label>
+                        <label for="file-upload" id="file-upload-label" class="file-input-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-2 text-slate-500"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                            <span id="file-status" class="text-slate-600 font-semibold">Klik atau seret file ke sini</span>
+                        </label>
+                        <input id="file-upload" type="file" class="hidden" accept=".pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+                    </div>
+                    <div>
+                        <label for="input-isu" class="block text-sm font-bold text-slate-700 mb-2"><span class="bg-blue-600 text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">7</span>Deskripsikan Topik Isu</label>
+                        <textarea id="input-isu" rows="3" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Contoh: Proses pelaporan kinerja bulanan masih manual, sering terjadi kesalahan rekapitulasi, dan terlambat."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step-button" class="pt-6 text-center" style="display:none;">
+                <button id="analyze-btn" class="w-full md:w-auto bg-green-600 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-green-700 transition">
+                    Analisis & Temukan "Benang Merah"
+                </button>
+                <div id="analysis-error" class="text-red-600 text-sm mt-2 font-medium" style="display: none;"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="results-wrapper" class="mt-12 space-y-8" style="display: none;">
+        <div id="initial-analysis-container"></div>
+        <div id="suggestions-history-container" class="space-y-6"></div>
+        <div id="results-actions" class="text-center space-x-4"></div>
+    </section>
+    
+    <section id="prompt-builder-form-container" class="mt-12" style="display: none;"></section>
+    <section id="final-prompt-output-container" class="mt-12" style="display: none;"></section>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- DATABASE (FULL 27 OFFICIAL RUMPUN) ---
+    const db = {
+        rumpun: {
+            '1. Fisika, kimia dan yang berkaitan': { jafung: ['Pengamat Gunung Api', 'Pranata Nuklir', 'Pengamat Metereologi dan Geofisika', 'Pengawas Radiasi', 'Pengembang Teknologi Nuklir', 'Asisten Penata Laboratorium Narkotika', 'Penata Laboratorium Narkotika'] },
+            '2. Matematika, Statistik dan yang berkaitan': { jafung: ['Statistisi'] },
+            '3. Kekomputeran': { jafung: ['Administrator Database Kependudukan', 'Analis Data Ilmiah', 'Manggala Informatika', 'Operator Sistem Informasi Administrasi Kependudukan', 'Pranata Komputer', 'Sandiman'] },
+            '4. Arsitek, Insinyur dan yang berkaitan': { jafung: ['Penyelidik Bumi', 'Surveyor Pemetaan', 'Penata Ruang', 'Teknik Jalan dan Jembatan', 'Teknik Pengairan', 'Teknik Penyehatan Lingkungan', 'Teknik Tata Bangunan dan Perumahan', 'Penata Kadastral', 'Asisten Penata Kadastral'] },
+            '5. Penelitian dan Perekayasaan': { jafung: ['Perekayasa', 'Peneliti', 'Teknisi Penelitian dan Perekayasaan', 'Pengembang Sistem Intelijen'] },
+            '6. Ilmu Hayat': { jafung: ['Penyuluh Pertanian', 'Penyuluh Perikanan', 'Asisten Pengelola Produksi Perikanan Tangkap', 'Pengawas Perikanan', 'Pengawas Mutu Pakan', 'Pengawas Mutu Hasil Pertanian', 'Analis Pasar Hasil Pertanian', 'Analis Pasar Hasil Perikanan', 'Analis Perkarantinaan Tumbuhan', 'Analis Perkebunrayaan', 'Asisten Inspektur Mutu Hasil Perikanan', 'Asisten Pembina Mutu Hasil Kelautan dan Perikanan', 'Dokter Hewan Karantina', 'Inspektur Mutu Hasil Perikanan', 'Medik Veteriner', 'Paramedik Veteriner', 'Paramedik Karantina Hewan', 'Pembina Mutu Hasil Kelautan dan Perikanan', 'Pemeriksa Karantina Tumbuhan', 'Pemeriksa Perlindungan Varietas Tanaman', 'Pengawas Benih Tanaman', 'Pengawas Bibit Ternak', 'Pengelola Ekosistem Laut dan Pesisir', 'Pengelola Kesehatan Ikan', 'Pengendali Dampak Lingkungan', 'Pengelola Produksi Perikanan Tangkap', 'Pengendali Ekosistem Hutan', 'Pengendali Hama dan Penyakit Ikan', 'Pengendali Organisme Pengganggu Tumbuhan', 'Penyuluh Kehutanan', 'Teknisi Perkebunrayaan', 'Teknisi Kesehatan Ikan', 'Teknisi Akuakultur', 'Analis Akuakultur', 'Penyuluh Lingkungan Hidup', 'Kurator Koleksi Hayati', 'Analis Prasarana Dan Sarana Pertanian', 'Analis Pengusahaan Jasa Kelautan', 'Asisten Penyuluh Perikanan', 'Asisten Pengawas Kelautan', 'Pengawas Kelautan', 'Asisten Pengawas Perikanan'] },
+            '7. Kesehatan': { jafung: ['Administrator Kesehatan', 'Perawat', 'Nutrisionis', 'Perawat Gigi', 'Apoteker', 'Asisten Apoteker', 'Asisten Penata Anestesi', 'Dokter', 'Dokter Gigi', 'Epidemiolog Kesehatan', 'Entomolog Kesehatan', 'Bidan', 'Pranata Laboratorium Kesehatan', 'Psikolog Klinis', 'Radiografer', 'Refraksionis Optisien', 'Sanitarian', 'Teknisi Elektromedis', 'Dokter Pendidik Klinis', 'Fisikawan Medis', 'Fisioterapis', 'Okupasi Terapis', 'Ortotis Prostetis', 'Pembimbing Kesehatan Kerja', 'Penata Anestesi', 'Penyuluh Kesehatan Masyarakat', 'Perekam Medis', 'Teknisi Gigi', 'Teknisi Transfusi Darah', 'Terapis Wicara', 'Terapis Gigi Dan Mulut', 'Tenaga Promosi Kesehatan', 'Tenaga Sanitasi Lingkungan'] },
+            '8. Pendidikan Tingkat Pendidikan Tinggi': { jafung: ['Dosen'] },
+            '9. Pendidikan Tingkat TK, Dasar, Lanjutan dan Sekolah Khusus': { jafung: ['Guru'] },
+            '10. Pendidikan lainnya': { jafung: ['Asisten Pelatih Olahraga', 'Instruktur', 'Pamong Belajar', 'Pelatih Olahraga', 'Pengawas Sekolah', 'Pengembang Kurikulum', 'Pengembang Penilaian Pendidikan', 'Pengembang Teknologi Pembelajaran', 'Penilik', 'Pranata Laboratorium Pendidikan', 'Widyaiswara'] },
+            '11. Operator dan Teknisi Alat-Alat Optik dan Elektronik': { jafung: ['Pengendali Frekuensi Radio'] },
+            '12. Teknisi dan Pengontrol Kapal dan Pesawat': { jafung: ['Pengawas Keselamatan Pelayaran', 'Teknisi Penerbangan'] },
+            '13. Pengawas Kualitas dan Keamanan': { jafung: ['Penguji Kendaraan Bermotor', 'Inspektur Tambang', 'Asisten Penguji Perangkat Telekomunikasi', 'Asesor Manajemen Mutu Industri', 'Pengawas Lingkungan Hidup', 'Pengawas Ketenagakerjaan', 'Inspektur Ketenagalistrikan', 'Pranata Laboratorium Kemetrologian', 'Rescuer', 'Analis Kebakaran', 'Asisten Inspektur Angkutan Udara', 'Asisten Inspektur Bandar Udara', 'Asisten Inspektur Keamanan Penerbangan', 'Inspektur Angkutan Udara', 'Inspektur Bandar Udara', 'Inspektur Keamanan Penerbangan', 'Inspektur Minyak dan Gas Bumi', 'Pemadam Kebakaran', 'Pengamat Tera', 'Penera', 'Pengawas Alat dan Mesin Pertanian', 'Pengawas Farmasi dan Makanan', 'Pengawas Kemetrologian', 'Pengawas Koperasi', 'Penguji Keselamatan dan Kesehatan Kerja', 'Penguji Mutu Barang', 'Penguji Perangkat Telekomunikasi', 'Metrolog', 'Analis Standardisasi', 'Inspektur Pengoperasian Pesawat Udara', 'Inspektur Navigasi Penerbangan', 'Inspektur Kelaikudaraan Pesawat Udara', 'Asisten Inspektur Pengoperasian Pesawat Udara', 'Asisten Inspektur Navigasi Penerbangan', 'Asisten Inspektur Kelaikudaraan Pesawat Udara', 'Pengawas Perdagangan', 'Pemeriksa Perdagangan Berjangka Komoditi', 'Penjamin Mutu Produk', 'Pranata Pencarian dan Pertolongan', 'Penata Kelola Pencarian Dan Pertolongan', 'Inspektur Panas Bumi'] },
+            '14. Akuntan dan Anggaran': { jafung: ['Analis Anggaran', 'Analis Keuangan Pusat dan Daerah', 'Analis Pengelolaan Keuangan APBN', 'Auditor', 'Analis Pembiayaan dan Risiko Keuangan', 'Analis Perbendaharaan Negara', 'Pembina Teknis Perbendaharaan Negara', 'Pemeriksa', 'Pranata Keuangan APBN', 'Pembina Profesi Keuangan', 'Asisten Pembina Profesi Keuangan'] },
+            '15. Asisten Profesional yang berhubungan dengan keuangan dan Penjualan': { jafung: ['Asisten Penilai Pajak', 'Penilai Pajak', 'Pelelang', 'Penilai Pemerintah', 'Analis Perdagangan'] },
+            '16. Imigrasi, Pajak dan Asisten Profesional yang berkaitan': { jafung: ['Penyuluh Pajak', 'Analis Keimigrasian', 'Pemeriksa Bea dan Cukai', 'Pemeriksa Keimigrasian', 'Pemeriksa Pajak', 'Negosiator Perdagangan', 'Pembina Industri', 'Asisten Pemeriksa Bea Dan Cukai', 'Asisten Pemeriksa Pajak', 'Asisten Penyuluh Pajak'] },
+            '17. Manajemen': { jafung: ['Analis APBN', 'Analis Ketahanan Pangan', 'Analis Kebijakan', 'Pengelola Pengadaan Barang/Jasa', 'Auditor Kepegawaian', 'Perencana', 'Penerjemah', 'Pembimbing Kemasyarakatan', 'Analis Pertahanan Negara', 'Asisten Perisalah Legislatif', 'Pembina Jasa Konstruksi', 'Penata Kelola Pemilihan Umum', 'Penata Laksana Barang', 'Perisalah Legislatif', 'Penata Kelola Intelijen', 'Asisten Penata Kelola Intelijen', 'Analis Intelijen', 'Pranata Sumber Daya Manusia Aparatur', 'Analis Sumber Daya Manusia Aparatur', 'Analis Kebencanaan', 'Analis Pemanfaatan Ilmu Pengetahuan dan Teknologi', 'Auditor Manajemen Aparatur Sipil Negara', 'Penata Penanggulangan Bencana', 'Penata Kelola Perusahaan Negara', 'Penata Kependudukan dan Keluarga Berencana', 'Penata Penerbitan Ilmiah', 'Penata Pertanahan', 'Asesor Sumber Daya Manusia Aparatur', 'Adyatama Kepariwisataan dan Ekonomi Kreatif', 'Analis Pengembangan Kompetensi', 'Analis Pemberantasan Tindak Pidana Korupsi', 'Pranata Pemberantasan Tindak Pidana Korupsi', 'Penata Perizinan'] },
+            '18. Hukum dan Peradilan': { jafung: ['Analis Investigasi dan Pengamanan Perdagangan', 'Mediator Hubungan Industrial', 'Perancang Peraturan Perundang-undangan', 'Pranata Peradilan', 'Analis Pemantauan Peraturan Perundang-undangan Legislatif', 'Kurator Keperdataan', 'Analis Hukum', 'Penata Kehakiman', 'Penata Mediasi Sengketa HAM', 'Pengaman Pemasyarakatan', 'Pembina Keamanan Pemasyarakatan', 'Penyidik Tindak Pidana Korupsi', 'Penyelidik Tindak Pidana Korupsi', 'Penata Perlindungan Saksi Dan Korban', 'Analis Legislatif'] },
+            '19. Hak Cipta, Paten dan Merek': { jafung: ['Pemeriksa Desain Industri', 'Kataloger', 'Pemeriksa Merek', 'Pemeriksa Paten', 'Analis Kekayaan Intelektual'] },
+            '20. Penyidik dan Detektif': { jafung: ['Agen', 'Polisi Kehutanan', 'Polisi Pamong Praja', 'Analis Transaksi Keuangan', 'Penyidik BNN', 'Pengawas Intelijen', 'Asisten Agen Intelijen', 'Agen Intelijen'] },
+            '21. Arsiparis, Pustakawan dan yang berkaitan': { jafung: ['Arsiparis', 'Pustakawan'] },
+            '22. Ilmu Sosial dan yang berkaitan': { jafung: ['Asisten Pembimbing Kemasyarakatan', 'Penyuluh Hukum', 'Pekerja Sosial', 'Pengantar Kerja', 'Penggerak Swadaya Masyarakat', 'Penyuluh Keluarga Berencana', 'Penyuluh Narkoba', 'Penyuluh Perindustrian dan Perdagangan', 'Penyuluh Sosial'] },
+            '23. Penerangan dan Seni Budaya': { jafung: ['Pranata Siaran', 'Asisten Pranata Siaran', 'Asisten Teknisi Siaran', 'Pamong Budaya', 'Pranata Humas', 'Teknisi Siaran'] },
+            '24. Keagamaan': { jafung: ['Penyuluh Agama', 'Penghulu', 'Pentashih Mushaf Al-Quran'] },
+            '25. Politik dan Hubungan Luar Negeri': { jafung: ['Diplomat', 'Pengawas Penyelenggaraan Urusan Pemerintahan Daerah', 'Penata Kanselerai', 'Pranata Informasi Diplomatik'] },
+            '26. Kesehatan dan-atau ilmu sosial lainnya': { jafung: ['Asisten Konselor Adiksi', 'Konselor Adiksi'] },
+            '27. Tenaga Kependidikan Lainnya': { jafung: ['Widyaprada', 'Widyabasa'] }
+        },
+    };
+    
+    // Selectors & State
+    const selects = { rumpun: document.getElementById('select-rumpun'), jafung: document.getElementById('select-jafung'), kategori: document.getElementById('select-kategori'), jenjang: document.getElementById('select-jenjang') };
+    const containers = {
+        mainInterface: document.getElementById('main-interface'),
+        stepJafung: document.getElementById('step-jafung'), stepKategori: document.getElementById('step-kategori'), stepJenjang: document.getElementById('step-jenjang'), 
+        stepContext: document.getElementById('step-context'), stepButton: document.getElementById('step-button'), 
+        resultsWrapper: document.getElementById('results-wrapper'), initialAnalysis: document.getElementById('initial-analysis-container'), 
+        suggestionsHistory: document.getElementById('suggestions-history-container'), resultsActions: document.getElementById('results-actions'),
+        promptBuilderForm: document.getElementById('prompt-builder-form-container'),
+        finalPromptOutput: document.getElementById('final-prompt-output-container'),
+        analysisError: document.getElementById('analysis-error')
+    };
+    const fileInput = document.getElementById('file-upload');
+    const fileStatus = document.getElementById('file-status');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const inputIsu = document.getElementById('input-isu');
+    const apiKeyInput = document.getElementById('api-key');
+    let fileData = { content: null, mimeType: null };
+    let suggestionCounter = 0;
+    let analysisResultData = null;
+
+    function initialize() {
+        populateSelect(selects.rumpun, Object.keys(db.rumpun));
+        selects.rumpun.addEventListener('change', handleRumpunChange);
+        selects.jafung.addEventListener('change', handleJafungChange);
+        selects.kategori.addEventListener('change', handleKategoriChange);
+        selects.jenjang.addEventListener('change', handleJenjangChange);
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+        analyzeBtn.addEventListener('click', () => handleAnalysis(false));
+        document.body.addEventListener('click', handleDynamicClicks);
+        document.body.addEventListener('change', handleDynamicChanges);
+    }
+    
+    function setupDragAndDrop() {
+        const label = document.getElementById('file-upload-label');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            label.addEventListener(eventName, e => {e.preventDefault(); e.stopPropagation();}, false);
+        });
+        ['dragenter', 'dragover'].forEach(eventName => {
+            label.addEventListener(eventName, () => label.classList.add('dragover'), false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            label.addEventListener(eventName, () => label.classList.remove('dragover'), false);
+        });
+        label.addEventListener('drop', e => handleFiles(e.dataTransfer.files), false);
+    }
+
+    function populateSelect(selectElement, options, isObject = false) {
+        selectElement.innerHTML = '<option value="">-- Silakan Pilih --</option>';
+        if (isObject) {
+            options.forEach(opt => selectElement.innerHTML += `<option value="${opt.value}">${opt.text}</option>`);
+        } else {
+            options.sort((a, b) => parseInt(a) - parseInt(b)).forEach(opt => selectElement.innerHTML += `<option value="${opt}">${opt}</option>`);
+        }
+    }
+
+    function handleRumpunChange() {
+        resetStep(2);
+        const rumpunKey = selects.rumpun.value;
+        if (rumpunKey) {
+            populateSelect(selects.jafung, db.rumpun[rumpunKey].jafung);
+            containers.stepJafung.style.display = 'block';
+        }
+    }
+
+    function handleJafungChange() {
+        resetStep(3);
+        if (selects.jafung.value) {
+             populateSelect(selects.kategori, [{value: 'Keahlian', text: 'Kategori Keahlian'}, {value: 'Keterampilan', text: 'Kategori Keterampilan'}], true);
+             containers.stepKategori.style.display = 'block';
+        }
+    }
+
+    function handleKategoriChange() {
+        resetStep(4);
+        const kategori = selects.kategori.value;
+        if(kategori){
+            let jenjangOptions = (kategori === 'Keahlian') 
+                ? [{ value: 'Ahli Pertama', text: 'Ahli Pertama' }, { value: 'Ahli Muda', text: 'Ahli Muda' }, { value: 'Ahli Madya', text: 'Ahli Madya' }, { value: 'Ahli Utama', text: 'Ahli Utama' }]
+                : [{ value: 'Pemula', text: 'Pemula' }, { value: 'Terampil', text: 'Terampil' }, { value: 'Mahir', text: 'Mahir' }, { value: 'Penyelia', text: 'Penyelia' }];
+            populateSelect(selects.jenjang, jenjangOptions, true);
+            containers.stepJenjang.style.display = 'block';
+        }
+    }
+
+    function handleJenjangChange() {
+        resetStep(5);
+        if (selects.jenjang.value) {
+            containers.stepContext.style.display = 'block';
+            containers.stepButton.style.display = 'block';
+        }
+    }
+    
+    function handleFiles(files) {
+        const file = files[0];
+        if (!file) return;
+        fileStatus.innerHTML = `<span>Membaca ${file.name}...</span>`;
+        fileData = { content: null, mimeType: null };
+        containers.analysisError.style.display = 'none'; 
+        document.getElementById('file-upload-label').classList.remove('has-file');
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            fileData.content = e.target.result.split(',')[1];
+            fileData.mimeType = file.type;
+            fileStatus.innerHTML = `✅ <strong>${file.name}</strong> siap dianalisis.`;
+            document.getElementById('file-upload-label').classList.add('has-file');
+        };
+        reader.onerror = () => {
+            fileData = { content: null, mimeType: null };
+            fileStatus.innerHTML = `<span class="text-red-600">Gagal membaca file.</span>`;
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    async function handleAnalysis(isRegeneration = false) {
+        containers.analysisError.style.display = 'none';
+        if(!isRegeneration) {
+             if (!fileData.content) { containers.analysisError.textContent = 'Gagal: Mohon unggah file tugas Anda.'; containers.analysisError.style.display = 'block'; return; }
+             if (!inputIsu.value.trim()) { containers.analysisError.textContent = 'Gagal: Mohon deskripsikan isu Anda.'; containers.analysisError.style.display = 'block'; return; }
+        }
+        const apiKey = apiKeyInput.value.trim();
+        if (!apiKey) { containers.analysisError.textContent = 'Gagal: Mohon masukkan Kunci API Gemini Anda.'; containers.analysisError.style.display = 'block'; return; }
+        
+        const actionButton = isRegeneration ? document.getElementById('get-more-suggestions-btn') : analyzeBtn;
+        actionButton.innerHTML = `<div class="loader inline-block"></div><span class="ml-2">Menganalisis...</span>`;
+        actionButton.disabled = true;
+
+        if (!isRegeneration) {
+            containers.initialAnalysis.innerHTML = '';
+            containers.suggestionsHistory.innerHTML = '';
+            containers.resultsActions.innerHTML = '';
+            containers.resultsWrapper.style.display = 'block';
+            suggestionCounter = 0;
+        }
+
+        const { rumpun, jafung, jenjang } = { rumpun: selects.rumpun.value, jafung: selects.jafung.value, jenjang: selects.jenjang.value };
+        const jenjangFocusDescription = { "Ahli Pertama": "Fokus pada pelaksanaan tugas teknis profesional berdasarkan pedoman.", "Ahli Muda": "Fokus pada pelaksanaan tugas yang lebih kompleks dan mulai memberi masukan pengembangan teknis.", "Ahli Madya": "Fokus pada koordinasi, pengembangan metode, dan supervisi.", "Ahli Utama": "Fokus pada perumusan kebijakan dan pengembangan sistem nasional.", "Terampil": "Tugas rutin teknis dengan tanggung jawab terbatas dan pengawasan.", "Mahir": "Pelaksanaan teknis lanjutan dan menjadi pembimbing teknis.", "Penyelia": "Supervisi, pembinaan teknis, dan evaluasi pelaksanaan kerja teknis." };
+        
+        const prompt = `Anda adalah ahli inovasi strategis untuk ASN Indonesia. Analisis data berikut: JABATAN: ${jafung}, Jenjang ${jenjang}. FOKUS UTAMA JENJANG INI ADALAH: "${jenjangFocusDescription[jenjang] || 'Pelaksanaan tugas sesuai arahan'}". Rumpun "${rumpun}". DOKUMEN TUGAS: Terlampir. ISU: """${inputIsu.value.trim()}""". TUGAS ANDA: 1. Analisis Benang Merah: Identifikasi 3-5 kata kunci utama dari dokumen tugas. Jelaskan hubungan antara tugas dan isu sebagai "Area Peluang Inovasi". 2. Saran Inovasi: Berikan 3 alternatif judul inovasi yang berbeda dari sebelumnya. Untuk setiap judul, berikan deskripsi singkat dan jelaskan relevansinya dengan FOKUS UTAMA JENJANG yang telah ditetapkan. JAWAB HANYA dalam format JSON: { "analysis": { "dutyKeywords": ["..."], "opportunity": "..." }, "suggestions": [ {"title": "...", "description": "...", "jenjangFocus": "Relevan untuk ${jenjang} karena..."} ] }`;
+        const payload = { "contents": [{ "parts": [{ "text": prompt }, { "inline_data": { "mime_type": fileData.mimeType, "data": fileData.content } }] }], "generationConfig": { "response_mime_type": "application/json" } };
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error.message || `HTTP error! status: ${response.status}`); }
+            const result = await response.json();
+            const responseData = JSON.parse(result.candidates[0].content.parts[0].text);
+            
+            if (!isRegeneration) {
+                analysisResultData = responseData.analysis;
+                containers.initialAnalysis.innerHTML = generateAnalysisHTML(analysisResultData);
+                analyzeBtn.style.display = 'none';
+            }
+            containers.suggestionsHistory.insertAdjacentHTML('beforeend', generateSuggestionsHTML(responseData.suggestions));
+            containers.resultsActions.innerHTML = generateActionButtonsHTML();
+            containers.resultsWrapper.scrollIntoView({ behavior: 'smooth' });
+        } catch (error) {
+            containers.initialAnalysis.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert"><p class="font-bold">Terjadi Kesalahan</p><p>Gagal menghubungi AI. Pastikan Kunci API Anda benar dan valid. Detail: ${error.message}</p></div>`;
+        } finally {
+            if (actionButton) {
+                actionButton.innerHTML = isRegeneration ? `Minta Saran Lainnya` : `Analisis & Temukan "Benang Merah"`;
+                actionButton.disabled = false;
+            }
+        }
+    }
+    
+    function generateAnalysisHTML(analysisData) { return `<div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-200 fade-in"><h3 class="text-2xl font-bold text-slate-900 mb-4">Hasil Analisis & Peluang Inovasi</h3><div class="space-y-6"><div class="p-4 bg-slate-50 rounded-lg border"><h4 class="font-semibold text-slate-800">1. Konteks Tugas Anda (dari Dokumen)</h4><p class="text-sm mt-1 text-slate-600"><strong>Kata Kunci Tugas Terdeteksi:</strong> ${analysisData.dutyKeywords.join(', ') || 'N/A'}</p></div><div class="p-4 bg-blue-50 rounded-lg border border-blue-200"><h4 class="font-bold text-blue-800">2. "Benang Merah" & Area Peluang Inovasi</h4><p class="text-sm mt-1 text-blue-700">${analysisData.opportunity || 'AI tidak menemukan benang merah yang jelas.'}</p></div></div></div>`; }
+    function generateSuggestionsHTML(suggestions) { suggestionCounter++; let html = `<div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-200 fade-in"><h4 class="font-bold text-slate-800 border-b pb-2 mb-4">Alternatif Judul Inovasi (Set #${suggestionCounter})</h4><div class="space-y-4">`; suggestions.forEach((idea, index) => { const uniqueId = `idea-${suggestionCounter}-${index}`; html += `<div class="idea-card p-4 bg-slate-50 rounded-lg border border-slate-200"><label for="${uniqueId}" class="flex items-start cursor-pointer"><input type="radio" id="${uniqueId}" name="selected_title" value="${idea.title}" class="mt-1 mr-4 shrink-0"><div><span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2">Fokus: ${idea.jenjangFocus || 'Umum'}</span><h5 class="font-bold text-green-700">${idea.title}</h5><p class="text-sm mt-1 text-slate-600">${idea.description}</p></div></label></div>`; }); html += `</div></div>`; return html; }
+    function generateActionButtonsHTML() { return `<button id="get-more-suggestions-btn" class="bg-slate-200 text-slate-800 font-semibold py-2.5 px-6 rounded-lg hover:bg-slate-300 transition">Minta Saran Lainnya</button><button id="proceed-to-prompt-btn" class="bg-blue-600 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:bg-blue-700 transition disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>Lanjutkan dengan Pilihan Ini</button>`; }
+    
+    function handleDynamicClicks(e) {
+        if (e.target.id === 'get-more-suggestions-btn') { handleAnalysis(true); }
+        if (e.target.id === 'proceed-to-prompt-btn') {
+            const selectedRadio = document.querySelector('input[name="selected_title"]:checked');
+            if (selectedRadio) { proceedToPromptBuilder(selectedRadio.value); } else { alert("Silakan pilih salah satu judul inovasi terlebih dahulu."); }
+        }
+        if (e.target.closest('#final-prompt-form') && e.target.tagName === 'BUTTON' && e.target.type === 'submit') { generateFinalPrompt(e); }
+        if (e.target.id === 'copy-final-prompt-btn') {
+            const promptText = document.getElementById('final-prompt-text').value;
+            const tempTextarea = document.createElement('textarea');
+            tempTextarea.value = promptText;
+            document.body.appendChild(tempTextarea);
+            tempTextarea.select();
+            try {
+                document.execCommand('copy');
+                e.target.textContent = 'Berhasil Disalin!';
+            } catch (err) {
+                e.target.textContent = 'Gagal Menyalin';
+            }
+            document.body.removeChild(tempTextarea);
+            setTimeout(() => { e.target.textContent = 'Salin Prompt'; }, 2000);
+        }
+        if(e.target.id === 'start-over-btn') { fullReset(); }
+    }
+    
+    function handleDynamicChanges(e) {
+        if (e.target.name === 'selected_title') {
+            const proceedBtn = document.getElementById('proceed-to-prompt-btn');
+            if (proceedBtn) proceedBtn.disabled = false;
+        }
+         if (e.target.id === 'provide-latar-belakang') { document.getElementById('prompt-latar-belakang').style.display = e.target.checked ? 'block' : 'none'; }
+        if (e.target.id === 'provide-cara-kerja') { document.getElementById('prompt-cara-kerja').style.display = e.target.checked ? 'block' : 'none'; }
+        if (e.target.id === 'provide-sistematika') { document.getElementById('prompt-sistematika').style.display = e.target.checked ? 'block' : 'none'; }
+    }
+    
+    function proceedToPromptBuilder(selectedTitle) {
+        containers.mainInterface.style.display = 'none';
+        containers.resultsWrapper.style.display = 'none';
+        const defaultSistematika = `BAB I: PENDAHULUAN (Latar Belakang, Tujuan, Manfaat)\nBAB II: RANCANGAN AKSI PERUBAHAN (Deskripsi Inovasi, Keterkaitan dengan Nilai BerAKHLAK, Tahapan Kegiatan dalam tabel)\nBAB III: PENUTUP (Kesimpulan, Saran)`;
+        const formHTML = `<div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-200 fade-in"><h2 class="text-2xl font-bold text-slate-900 mb-6 text-center">Langkah Terakhir: Lengkapi Bahan Baku Prompt</h2><form id="final-prompt-form" class="space-y-6"><div><label class="block text-sm font-bold text-slate-700 mb-1">Judul Inovasi Pilihan</label><input type="text" id="prompt-title" class="w-full px-4 py-2 bg-slate-200 border rounded-lg" value="${selectedTitle}" readonly></div><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><label for="prompt-nama" class="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap</label><input type="text" id="prompt-nama" class="w-full px-4 py-2 bg-slate-50 border rounded-lg" required></div><div><label for="prompt-instansi" class="block text-sm font-bold text-slate-700 mb-1">Nama Instansi</label><input type="text" id="prompt-instansi" class="w-full px-4 py-2 bg-slate-50 border rounded-lg" required></div></div><div><label class="flex items-center space-x-3"><input type="checkbox" id="provide-latar-belakang" class="h-4 w-4 rounded"><span class="text-sm font-bold">Saya akan memberikan data/poin tambahan untuk Latar Belakang</span></label><textarea id="prompt-latar-belakang" rows="3" style="display:none;" class="mt-2 w-full px-4 py-2 bg-slate-50 border" placeholder="Contoh:&#10;- Keterlambatan laporan rata-rata 5 hari kerja."></textarea></div><div><label class="flex items-center space-x-3"><input type="checkbox" id="provide-cara-kerja" class="h-4 w-4 rounded"><span class="text-sm font-bold">Saya akan menulis deskripsi cara kerja sendiri</span></label><textarea id="prompt-cara-kerja" rows="3" style="display:none;" class="mt-2 w-full px-4 py-2 bg-slate-50 border" placeholder="Jelaskan cara kerja inovasi Anda."></textarea></div><div><label class="flex items-center space-x-3"><input type="checkbox" id="provide-sistematika" class="h-4 w-4 rounded"><span class="text-sm font-bold">Saya ingin menentukan sistematika proposal sendiri</span></label><textarea id="prompt-sistematika" rows="4" style="display:none;" class="mt-2 w-full px-4 py-2 bg-slate-50 border">${defaultSistematika}</textarea></div><div class="text-center pt-4"><button type="submit" class="w-full md:w-auto bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg">Buat & Salin Prompt Final</button></div></form></div>`;
+        containers.promptBuilderForm.innerHTML = formHTML;
+        containers.promptBuilderForm.style.display = 'block';
+        containers.promptBuilderForm.scrollIntoView({behavior: 'smooth'});
+    }
+
+    function generateFinalPrompt(e) {
+        e.preventDefault();
+        const { rumpun, jafung, jenjang } = { rumpun: selects.rumpun.value, jafung: selects.jafung.value, jenjang: selects.jenjang.value };
+        const formData = { title: document.getElementById('prompt-title').value, nama: document.getElementById('prompt-nama').value, instansi: document.getElementById('prompt-instansi').value, latarBelakang: document.getElementById('prompt-latar-belakang').value, caraKerja: document.getElementById('prompt-cara-kerja').value, useCustomSistematika: document.getElementById('provide-sistematika').checked, sistematika: document.getElementById('prompt-sistematika').value };
+        let prompt = `Anda adalah ahli penyusunan dokumen strategis ASN. Buatkan draf Proposal Inovasi / Aksi Perubahan yang profesional berdasarkan data berikut:\n\n== DATA & KONTEKS ==\nA. IDENTITAS PENGUSUL:\n- Nama: ${formData.nama}\n- Jabatan: ${jafung} ${jenjang}\n- Instansi: ${formData.instansi}\n\nB. KONTEKS TUGAS (dari analisis sebelumnya):\n- Isu Utama: ${inputIsu.value}\n- Kata Kunci Tugas (dari PDF): ${analysisResultData.dutyKeywords.join(', ')}\n- Area Peluang Inovasi: ${analysisResultData.opportunity}\n\nC. GAGASAN INOVASI:\n- Judul Inovasi: ${formData.title}\n`;
+        if (formData.latarBelakang) { prompt += `- Data Pendukung Latar Belakang Masalah: \n${formData.latarBelakang}\n`; }
+        if (formData.caraKerja) { prompt += `- Deskripsi Cara Kerja dari Pengguna: ${formData.caraKerja}\n`; }
+        prompt += `\n== PERINTAH UNTUK ANDA (AI) ==\nBerdasarkan semua data di atas, susunlah Draf Proposal lengkap dengan kerangka yang saya tentukan di bawah ini.\n\nSISTEMATIKA PENULISAN:\n${formData.sistematika}\n\nInstruksi Tambahan:\n- Olah "Data Pendukung Latar Belakang" (jika ada) dan "Isu Utama" menjadi narasi yang kuat untuk bagian Latar Belakang.\n- Jika pengguna memberikan "Deskripsi Cara Kerja", gunakan itu sebagai dasar. Jika tidak, rumuskan cara kerja yang logis.\n- Gunakan bahasa Indonesia yang formal dan profesional.`;
+        displayFinalPrompt(prompt);
+    }
+
+    function displayFinalPrompt(promptText) {
+        const outputHTML = `<div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-200 fade-in"><h2 class="text-2xl font-bold text-slate-900 mb-4 text-center">Prompt Final Anda Siap Disalin!</h2><p class="text-center text-slate-600 mb-6">Salin prompt di bawah ini dan gunakan di platform AI favorit Anda.</p><textarea id="final-prompt-text" readonly class="w-full h-96 bg-slate-800 text-white p-4 rounded-lg text-sm font-mono whitespace-pre-wrap">${promptText}</textarea><div class="mt-4 flex gap-4"><button id="copy-final-prompt-btn" class="w-full bg-emerald-500 text-white font-semibold py-3 px-4 rounded-lg hover:bg-emerald-600 transition">Salin Prompt</button><button id="start-over-btn" class="w-full bg-slate-200 text-slate-800 font-semibold py-3 px-4 rounded-lg hover:bg-slate-300 transition">Mulai dari Awal</button></div></div>`;
+        containers.finalPromptOutput.innerHTML = outputHTML;
+        containers.finalPromptOutput.style.display = 'block';
+        containers.promptBuilderForm.style.display = 'none';
+        containers.finalPromptOutput.scrollIntoView({behavior: 'smooth'});
+    }
+    
+    function resetStep(step) {
+        if (step <= 2) { containers.stepJafung.style.display = 'none'; selects.jafung.innerHTML = ''; }
+        if (step <= 3) { containers.stepKategori.style.display = 'none'; selects.kategori.value = ''; }
+        if (step <= 4) { containers.stepJenjang.style.display = 'none'; selects.jenjang.innerHTML = ''; }
+        if (step <= 5) { 
+            containers.stepContext.style.display = 'none'; 
+            containers.stepButton.style.display = 'none'; 
+            inputIsu.value = '';
+            fileStatus.textContent = 'Klik atau seret file ke sini';
+            fileInput.value = '';
+            fileData = { content: null, mimeType: null };
+            containers.resultsWrapper.style.display = 'none';
+            if(containers.analysisError) containers.analysisError.style.display = 'none';
+        }
+    }
+    
+    function fullReset() { 
+        selects.rumpun.value = ''; 
+        resetStep(2); 
+        containers.mainInterface.style.display = 'block';
+        containers.resultsWrapper.style.display = 'none';
+        containers.promptBuilderForm.style.display = 'none';
+        containers.finalPromptOutput.style.display = 'none';
+    }
+    
+    initialize();
+});
+</script>
+
+</body>
+</html>
